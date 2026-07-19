@@ -8,17 +8,14 @@ import datetime
 import os
 import platform
 
-# ====== 1. Configure Gemini API Key from Streamlit Secrets ======
+# ====== Configure Gemini API Key from Streamlit Secrets ======
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 model = genai.GenerativeModel("gemini-2.0-flash")
-# ====== 2. Configure Tesseract path (Works on both Windows and Linux Cloud) ======
+
+# ====== Configure Tesseract (works on both Windows and Linux Cloud) ======
 if platform.system() == "Windows":
-    # For local Windows PC
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-else:
-    # For Streamlit Cloud (Linux) - it finds Tesseract automatically via PATH
-    # You can also set it explicitly if needed: pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
-    pass
+# On Linux (Streamlit Cloud), tesseract is installed via packages.txt and found automatically
 
 st.set_page_config(page_title="Medical Summarizer", layout="centered")
 st.title("🩺 Medical Text Summarizer & Q&A Generator")
@@ -29,6 +26,7 @@ user_text = ""
 
 if option == "📝 Paste Text":
     user_text = st.text_area("Paste your medical text here:", height=200)
+
 else:
     uploaded_file = st.file_uploader("Upload image (JPG, PNG)", type=["jpg", "jpeg", "png"])
     if uploaded_file is not None:
@@ -60,7 +58,7 @@ if st.button("🚀 Analyze"):
             st.success("✅ Analysis Done!")
             st.write(result_text)
 
-            # Word Download Button
+            # Create Word document
             doc = Document()
             doc.add_heading('Medical Text Analysis Report', 0)
             doc.add_heading('Original Text:', level=1)
