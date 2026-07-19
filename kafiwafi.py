@@ -7,7 +7,7 @@ from io import BytesIO
 import datetime
 
 # ====== Configure Gemini ======
-genai.configure(api_key="AQ.Ab8RN6JRxoGnxSlZ1h60io08XGdGKXm-wWG2hFftiWEfhafk2A")
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 model = genai.GenerativeModel("gemini-2.0-flash")
 
 # ====== Set Tesseract path ======
