@@ -9,7 +9,7 @@ import os
 import platform
 
 # ====== 1. Configure Gemini API Key from Streamlit Secrets ======
-GEMINI_API_KEY = "AQ.Ab8RN6JRxoGnxSlZ1h60io08XGdGKXm-wWG2hFftiWEfhafk2A"
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 model = genai.GenerativeModel("gemini-2.0-flash")
 # ====== 2. Configure Tesseract path (Works on both Windows and Linux Cloud) ======
 if platform.system() == "Windows":
