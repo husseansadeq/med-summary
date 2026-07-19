@@ -5,13 +5,20 @@ import pytesseract
 from docx import Document
 from io import BytesIO
 import datetime
+import os
+import platform
 
-# ====== Configure Gemini ======
+# ====== 1. Configure Gemini API Key from Streamlit Secrets ======
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel("gemini-2.0-flash")
 
-# ====== Set Tesseract path ======
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# ====== 2. Configure Tesseract path (Works on both Windows and Linux Cloud) ======
+if platform.system() == "Windows":
+    # For local Windows PC
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+else:
+    # For Streamlit Cloud (Linux) - it finds Tesseract automatically via PATH
+    # You can also set it explicitly if needed: pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+    pass
 
 st.set_page_config(page_title="Medical Summarizer", layout="centered")
 st.title("🩺 Medical Text Summarizer & Q&A Generator")
@@ -22,7 +29,6 @@ user_text = ""
 
 if option == "📝 Paste Text":
     user_text = st.text_area("Paste your medical text here:", height=200)
-
 else:
     uploaded_file = st.file_uploader("Upload image (JPG, PNG)", type=["jpg", "jpeg", "png"])
     if uploaded_file is not None:
@@ -40,7 +46,6 @@ else:
         else:
             st.warning("⚠️ No English text found.")
 
-# ====== Analysis Button ======
 if st.button("🚀 Analyze"):
     if user_text.strip():
         with st.spinner("Processing with AI..."):
@@ -52,32 +57,24 @@ if st.button("🚀 Analyze"):
             """
             response = model.generate_content(prompt)
             result_text = response.text
-            
             st.success("✅ Analysis Done!")
             st.write(result_text)
 
-            # ====== NEW: Word Download Button ======
-            # Create Word document in memory
+            # Word Download Button
             doc = Document()
             doc.add_heading('Medical Text Analysis Report', 0)
             doc.add_heading('Original Text:', level=1)
             doc.add_paragraph(user_text)
-            
             doc.add_heading('Analysis Result (Summary & Q&A):', level=1)
-            # Split the result into paragraphs for better formatting
             for line in result_text.split('\n'):
                 if line.strip():
                     doc.add_paragraph(line.strip())
-            
-            # Add timestamp
             doc.add_paragraph(f"\nGenerated on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
-            # Save to bytes
             doc_io = BytesIO()
             doc.save(doc_io)
             doc_io.seek(0)
 
-            # Download button
             st.download_button(
                 label="📥 Download as Word Document (.docx)",
                 data=doc_io,
